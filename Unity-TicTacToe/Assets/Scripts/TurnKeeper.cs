@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 public class TurnKeeper
 {
     public enum Turn
@@ -16,9 +17,10 @@ public class TurnKeeper
         _ttbs = ttbs;
         _sgb = sgb;
         Current = Turn.Player;
+        GameEvents.WinConditionEvent.Invoke(false, $"it is the {Current.ToString()}'s turn");
     }
 
-    public bool CheckWinCondition()
+    public (List<TicTacToeBehaviour>, string) CheckWinCondition()
     {
         var row1 = new List<TicTacToeBehaviour> { _ttbs[0], _ttbs[1], _ttbs[2] };
         var row2 = new List<TicTacToeBehaviour> { _ttbs[3], _ttbs[4], _ttbs[5] };
@@ -31,28 +33,33 @@ public class TurnKeeper
 
         var items = new List<List<TicTacToeBehaviour>>
             { row1, row2, row3, col1, col2, col3, diag1, diag2 };
+
+        (List<TicTacToeBehaviour>, string) result = (null, "");
         
         foreach (var item in items)
         {
-            var result = IsWinner(item);
+            result = IsWinner(item);
             if (result.Item1 != null)
-            {
-                GameEvents.WinConditionEvent.Invoke(true, result.Item2);
-                return true;
-            }
+                break;
         }
-        return false;
+        if (result.Item1 == null && items.TrueForAll(x => x.TrueForAll(y => y.Visited)))
+        {
+            result = ((new List<TicTacToeBehaviour>()), "stalemate");
+            Current = Turn.None;
+        }
+        return result;
     }
 
     private (List<TicTacToeBehaviour>, string) IsWinner(List<TicTacToeBehaviour> triplet)
     {
+        (List<TicTacToeBehaviour>, string) result = (null, "no winner yet");
         bool o_winner = triplet.TrueForAll(x => x.isO);
-        if (o_winner) return (triplet, "o winner");
+        if (o_winner) result= (triplet, "o winner");
 
         bool x_winner = triplet.TrueForAll(x => x.isX);
-        if (x_winner) return (triplet, "x winner");
+        if (x_winner) result =  (triplet, "x winner");
 
-        return (null, "no winner yet");
+        return result;
     }
 
     public void TakeTurn(TicTacToeBehaviour ttb, Turn turn)
@@ -64,15 +71,18 @@ public class TurnKeeper
 
     public void ReleaseTurnTo(Turn turn)
     {
-        if (CheckWinCondition())
+        var result = CheckWinCondition();
+        if(result.Item1 != null)
         {
+            GameEvents.WinConditionEvent.Invoke(true, $"{Current.ToString()} is the winner!!");
             Current = Turn.None;
             _sgb.StartCoroutine(_sgb.ResetGame(3));
             return;
         }
 
         Current = turn;
-
+        GameEvents.WinConditionEvent.Invoke(false, $"it is the {Current.ToString()}'s turn");
+        
         if (Current == Turn.AI)
         {
             GameEvents.PlayerEndTurnEvent.Invoke();

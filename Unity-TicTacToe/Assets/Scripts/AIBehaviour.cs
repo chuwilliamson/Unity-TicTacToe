@@ -5,6 +5,7 @@ public class AIBehaviour : MonoBehaviour
 {
     [SerializeField]
     private List<TicTacToeBehaviour> _ticTacToeBehaviours;
+    public float aiSpeed = 2;
 
     private TurnKeeper _turnKeeper;
     private void Start()
@@ -31,12 +32,11 @@ public class AIBehaviour : MonoBehaviour
 
     public void StartTurn()
     {
-        StartCoroutine(ChoiceRoutine());
+        StartCoroutine(ChoiceRoutine(aiSpeed));
     }
-
-    private IEnumerator ChoiceRoutine()
+    private IEnumerator ChoiceRoutine(float delay)
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(delay);
 
         var ttb = _ticTacToeBehaviours.Find(x => x.Visited == false);
         if (ttb != null)

@@ -7,7 +7,7 @@ public class UITextBehaviour : MonoBehaviour
 {
     private TMP_Text _tmpText;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         _tmpText = GetComponent<TMP_Text>();
      GameEvents.WinConditionEvent.AddListener(OnWinConditionMet);   

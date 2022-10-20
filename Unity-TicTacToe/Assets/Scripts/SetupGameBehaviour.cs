@@ -72,7 +72,7 @@ public class SetupGameBehaviour : MonoBehaviour
         {
             var result = IsWinner(item);
             if (result.Item1 != null)
-                Debug.Log($"{result.Item2}with items {result.Item1}");
+                Debug.Log($"{result.Item2} with items {result.Item1}");
         }
     }
 

@@ -1,36 +1,37 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 public class SetupGameBehaviour : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject prefab;
-
-    private Animator _animator;
-    [SerializeField] public int offset = 5;
-    private readonly List<GameObject> Grid = new List<GameObject>();
     private static readonly int s_Start = Animator.StringToHash("start");
     private static readonly int s_End = Animator.StringToHash("end");
+    [SerializeField]
+    private GameObject prefab;
+    [SerializeField] public int offset = 5;
+    public float runtime;
+    private readonly List<GameObject> Grid = new List<GameObject>();
+
+    private Animator _animator;
+    private List<TicTacToeBehaviour> _ttbs;
     // Start is called before the first frame update
     private void Start()
     {
         _animator = GetComponent<Animator>();
         _animator.SetTrigger(s_Start);
     }
+    private void Update()
+    {
+        runtime += Time.deltaTime;
+    }
 
     [ContextMenu("Destroy Grid")]
     private void DestroyGrid()
     {
         Grid.Clear();
-        for(int i = transform.childCount -1 ; i >=0 ; i--)
+        for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
-        } 
-    }
-    private void Update()
-    {
-        runtime += Time.deltaTime;
+        }
     }
     [ContextMenu("Spawn Grid")]
     private void SpawnGrid()
@@ -47,12 +48,10 @@ public class SetupGameBehaviour : MonoBehaviour
                 Grid.Add(go);
                 count++;
             }
-        } 
+        }
         GameEvents.GridInitializedEvent.Invoke(_ttbs);
         GameEvents.TurnKeeperInitializedEvent.Invoke(new TurnKeeper(_ttbs, this));
     }
-    public float runtime;
-    private List<TicTacToeBehaviour> _ttbs;
 
     internal IEnumerator ResetGame(float waittime)
     {
@@ -67,20 +66,20 @@ public class SetupGameBehaviour : MonoBehaviour
     }
     public void EndGameFinished()
     {
-        _ttbs.ForEach(t=> t.ResetCell());
+        _ttbs.ForEach(t => t.ResetCell());
         _animator.SetTrigger(s_Start);
     }
-    
+
     public IEnumerator WaitAndAnimate(float delay, int trigger)
     {
         yield return new WaitForSeconds(delay);
         _animator.SetTrigger(trigger);
     }
-    
-    
+
+
     public void StartEndGame()
     {
-        
+
         StartCoroutine(WaitAndAnimate(3, s_End));
     }
 }

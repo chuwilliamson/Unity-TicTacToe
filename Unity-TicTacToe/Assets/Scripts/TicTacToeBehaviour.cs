@@ -8,13 +8,14 @@ public class TicTacToeBehaviour : MonoBehaviour, IPointerClickHandler
     public bool isO;
     public bool isX;
     public bool Visited;
-    public bool WinCondition;
+    
     private TurnKeeper _turnKeeper;
     
     private static readonly int s_IsX = Animator.StringToHash("is_x");
     private static readonly int s_IsO = Animator.StringToHash("is_o");
     private TicTacToeBehaviour _ticTacToeBehaviour;
-    
+    private static readonly int s_IsDone = Animator.StringToHash("is_done");
+
     private void Awake()
     {
         _ticTacToeBehaviour = GetComponent<TicTacToeBehaviour>();
@@ -26,7 +27,12 @@ public class TicTacToeBehaviour : MonoBehaviour, IPointerClickHandler
         _turnKeeper = arg0;
     }
 
-
+    public void ResetCell()
+    {
+        isO = isX = Visited = false;
+        _animator.SetTrigger(s_IsDone);
+    }
+    
     public void OnPointerClick(PointerEventData eventData)
     {
         _turnKeeper.TakeTurn(this, TurnKeeper.Turn.Player);

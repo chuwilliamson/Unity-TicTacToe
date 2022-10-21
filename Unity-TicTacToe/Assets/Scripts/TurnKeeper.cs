@@ -76,7 +76,7 @@ public class TurnKeeper
         {
             GameEvents.WinConditionEvent.Invoke(true, $"{Current.ToString()} is the winner!!");
             Current = Turn.None;
-            _sgb.StartCoroutine(_sgb.ResetGame(3));
+            _sgb.StartEndGame();
             return;
         }
 
